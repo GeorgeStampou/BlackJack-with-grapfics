@@ -25,33 +25,77 @@ number = {"ace", 2, 3, 4, 5, 6, 7, 8, 9, 10,"jack", "queen", "king"}
 deck = {(k,n) for k in kind for n in number}
 
 
-def player(player_cards):
+def player():
     print("\n******Player's turn!******")
+    player_cards = set()
+    cards = set()
 
     for _ in range(2):
         card = deck.pop()
         print(card)
-        player_cards.add(card)
+        cards.add(card)
+        print("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")
 
-    print(f"\nPlayer's cards: {player_cards}")
+        card_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")),
+                                      (CARD_WIDTH, CARD_HEIGHT))
+        player_cards.add(card_image)
+
+    print(f"\nPlayer's cards: {cards}")
 
     #sum_hand = hand_value(player_cards)
 
+    return player_cards
 
-def draw_window(card):
+
+def computer():
+    computer_cards = set()
+    cards = set()
+
+    print("\n******Computer's turn!******")
+
+    for _ in range(2):
+        card = deck.pop()
+        print(card)
+        cards.add(card)
+        print("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")
+
+        card_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")),
+                                      (CARD_WIDTH, CARD_HEIGHT))
+        computer_cards.add(card_image)
+
+    print(f"\nComputer's cards: {cards}")
+
+    return computer_cards
+
+
+def draw_window(player_cards,computer_cards):
+
+    step = 150
+
     WIN.fill(GREEN)
     WIN.blit(dealer_text, (100,100))
     WIN.blit(player_text, (100, 700))
-    WIN.blit(card, (300,0))
+    for card in player_cards:
+        
+        WIN.blit(card, (step + CARD_WIDTH,600))
+        step += 150
+
+    step = 150
+    for card in computer_cards:
+        
+        WIN.blit(card, (step + CARD_WIDTH,0))
+        step += 150
+        
     pygame.display.update()
+
 
 def main():
     clock = pygame.time.Clock()
     run = True
-    card = pygame.transform.scale(pygame.image.load(os.path.join("Assets/hearts", "ace_hearts.png")),
-                                  (CARD_WIDTH, CARD_HEIGHT))
-    player_cards = set()
-    player(player_cards)
+
+
+    player_cards = player()
+    computer_cards = computer()
 
     while run:
         clock.tick(FPS)
@@ -59,7 +103,7 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        draw_window(card)
+        draw_window(player_cards,computer_cards)
 
     pygame.quit()
 
