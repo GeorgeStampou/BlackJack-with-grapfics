@@ -12,7 +12,7 @@ BLACK = (0,0,0)
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("BlackJack")
 
-font = pygame.font.Font('freesansbold.ttf', 32)
+font = pygame.font.Font('freesansbold.ttf', 26)
 
 dealer_text = font.render("Dealer", True, BLACK)
 player_text = font.render("Player", True, BLACK)
@@ -42,9 +42,9 @@ def player():
 
     print(f"\nPlayer's cards: {cards}")
 
-    #sum_hand = hand_value(player_cards)
+    sum_hand = hand_value(cards)
 
-    return player_cards
+    return [player_cards, sum_hand]
 
 
 def computer():
@@ -68,13 +68,34 @@ def computer():
     return computer_cards
 
 
-def draw_window(player_cards,computer_cards):
+def hand_value(cards):
+    cards_sum = 0
+    ace = False
+
+    for card in cards:
+        if card[1] == "jack" or card[1] == "queen" or card[1] == "king":
+            cards_sum += 10
+        elif card[1] == "ace":
+            ace = True
+            cards_sum += 1
+        else:
+            cards_sum += int(card[1])
+        
+    if ace and cards_sum + 10 <= 21:
+        cards_sum += 10
+
+
+    return cards_sum
+
+
+def draw_window(player_cards,computer_cards, players_sum):
+    players_sum_text = font.render("Your total sum is: "+str(players_sum),True,BLACK)
 
     step = 150
 
     WIN.fill(GREEN)
-    WIN.blit(dealer_text, (100,100))
-    WIN.blit(player_text, (100, 700))
+    WIN.blit(dealer_text, (0,100))
+    WIN.blit(player_text, (0, 700))
     for card in player_cards:
         
         WIN.blit(card, (step + CARD_WIDTH,600))
@@ -85,7 +106,8 @@ def draw_window(player_cards,computer_cards):
         
         WIN.blit(card, (step + CARD_WIDTH,0))
         step += 150
-        
+    
+    WIN.blit(players_sum_text, (0,750))
     pygame.display.update()
 
 
@@ -93,8 +115,10 @@ def main():
     clock = pygame.time.Clock()
     run = True
 
+    players_sum = 0
 
-    player_cards = player()
+
+    player_cards, players_sum = player()
     computer_cards = computer()
 
     while run:
@@ -103,7 +127,7 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        draw_window(player_cards,computer_cards)
+        draw_window(player_cards,computer_cards,players_sum)
 
     pygame.quit()
 
