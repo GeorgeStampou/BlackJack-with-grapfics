@@ -5,6 +5,7 @@ pygame.init()
 
 WIDTH, HEIGHT = 1200, 800
 CARD_WIDTH , CARD_HEIGHT = 150, 200
+BUTTON_WIDTH, BUTTON_HEIGHT = 80, 80
 FPS = 60
 GREEN = (0,100,0)
 BLACK = (0,0,0)
@@ -17,6 +18,10 @@ font = pygame.font.Font('freesansbold.ttf', 26)
 dealer_text = font.render("Dealer", True, BLACK)
 player_text = font.render("Player", True, BLACK)
 
+hit_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/options", "hit.png")),
+                                   (BUTTON_WIDTH, BUTTON_HEIGHT))
+stand_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/options", "stand.png")),
+                                     (BUTTON_WIDTH, BUTTON_HEIGHT))
 
 
 kind = {"heart", "diamond", "spade", "club"}
@@ -89,7 +94,7 @@ def hand_value(cards):
 
 
 def draw_window(player_cards,computer_cards, players_sum):
-    players_sum_text = font.render("Your total sum is: "+str(players_sum),True,BLACK)
+    players_sum_text = font.render("Your total sum is: "+str(players_sum), True, BLACK)
 
     step = 150
 
@@ -108,7 +113,14 @@ def draw_window(player_cards,computer_cards, players_sum):
         step += 150
     
     WIN.blit(players_sum_text, (0,750))
-    pygame.display.update()
+
+    #pygame.display.update()
+
+
+def draw_buttons():
+    WIN.blit(hit_image, (300, 500))
+    WIN.blit(stand_image, (390, 500))
+
 
 
 def main():
@@ -116,7 +128,6 @@ def main():
     run = True
 
     players_sum = 0
-
 
     player_cards, players_sum = player()
     computer_cards = computer()
@@ -127,9 +138,13 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        draw_window(player_cards,computer_cards,players_sum)
+        draw_window(player_cards, computer_cards, players_sum)
+        draw_buttons()
+        pygame.display.update()
+
 
     pygame.quit()
+
 
 if __name__ == '__main__':
     main()
