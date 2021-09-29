@@ -1,5 +1,6 @@
 import pygame
 import os
+import button
 
 pygame.init()
 
@@ -30,26 +31,29 @@ number = {"ace", 2, 3, 4, 5, 6, 7, 8, 9, 10,"jack", "queen", "king"}
 deck = {(k,n) for k in kind for n in number}
 
 
+def new_card(pcards, value_of_cards):
+
+    card = deck.pop()
+    print(card)
+    value_of_cards.add(card)
+    print("Assets/" + card[0], str(card[1]) + "_" + card[0] + ".png")
+
+    card_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/" + card[0],
+                                        str(card[1]) + "_" + card[0] + ".png")), (CARD_WIDTH, CARD_HEIGHT))
+    pcards.add(card_image)
+    return [pcards, value_of_cards]
+
+
 def player():
     print("\n******Player's turn!******")
     player_cards = set()
     cards = set()
 
     for _ in range(2):
-        card = deck.pop()
-        print(card)
-        cards.add(card)
-        print("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")
+        new_card(player_cards, cards)
+    print(f"\nPlayer's cards: {player_cards}")
 
-        card_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/"+card[0],
-                                            str(card[1]) + "_" + card[0]+".png")), (CARD_WIDTH, CARD_HEIGHT))
-        player_cards.add(card_image)
-
-    print(f"\nPlayer's cards: {cards}")
-
-    sum_hand = hand_value(cards)
-
-    return [player_cards, sum_hand]
+    return [player_cards, cards]
 
 
 def computer():
@@ -57,20 +61,11 @@ def computer():
     cards = set()
 
     print("\n******Computer's turn!******")
-
-
-    card = deck.pop()
-    print(card)
-    cards.add(card)
-    print("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")
-
-    card_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")),
-                                    (CARD_WIDTH, CARD_HEIGHT))
-    computer_cards.add(card_image)
+    new_card(computer_cards, cards)
 
     print(f"\nComputer's cards: {cards}")
 
-    return computer_cards
+    return [computer_cards, cards]
 
 
 def hand_value(cards):
@@ -89,7 +84,6 @@ def hand_value(cards):
     if ace and cards_sum + 10 <= 21:
         cards_sum += 10
 
-
     return cards_sum
 
 
@@ -99,11 +93,11 @@ def draw_window():
     WIN.blit(dealer_text, (0,100))
     WIN.blit(player_text, (0, 700))
 
-    #pygame.display.update()
+    # pygame.display.update()
 
 
-def draw_cards(player_cards, computer_cards, players_sum):
-    players_sum_text = font.render("Your total sum is: " + str(players_sum), True, BLACK)
+def draw_cards(player_cards, computer_cards):
+
     step = 150
     for card in player_cards:
         WIN.blit(card, (step + CARD_WIDTH, 600))
@@ -113,12 +107,13 @@ def draw_cards(player_cards, computer_cards, players_sum):
     for card in computer_cards:
         WIN.blit(card, (step + CARD_WIDTH, 0))
         step += 150
+
+
+def draw_cards_sum(players_sum, computers_sum):
+    players_sum_text = font.render("Your total sum is: " + str(players_sum), True, BLACK)
+    computers_sum_text = font.render("Dealer's sum is: " + str(computers_sum), True, BLACK)
     WIN.blit(players_sum_text, (0, 750))
-
-
-def draw_buttons():
-    WIN.blit(hit_image, (300, 500))
-    WIN.blit(stand_image, (390, 500))
+    WIN.blit(computers_sum_text, (0, 150))
 
 
 def check_round(players_sum, computers_sum):
@@ -129,6 +124,8 @@ def check_round(players_sum, computers_sum):
         result = 'player'
     elif players_sum < 21:
         draw_result("gia na dw an proxwraei ok")
+    else:
+        draw_result("***You lost***")
 
     return result
 
@@ -139,22 +136,23 @@ def draw_result(string):
     WIN.blit(string_text, string_rect)
 
 
-
-
-
-
 def main():
     clock = pygame.time.Clock()
     run = True
+
+    hit_button = button.Button(300, 500, hit_image, 1)
+    stand_button = button.Button(390, 500, stand_image, 1)
 
     rounds = 1
     score = [0, 0]
     result = ""
 
-    players_sum = 0
+    players_sum, computers_sum = 0, 0
 
-    player_cards, players_sum = player()
-    computer_cards = computer()
+    player_cards, values_pcards = player()
+    players_sum = hand_value(values_pcards)
+    computer_cards, values_ccards = computer()
+    computers_sum = hand_value(values_ccards)
 
     while run:
         clock.tick(FPS)
@@ -163,13 +161,18 @@ def main():
                 run = False
 
         draw_window()
-        draw_cards(player_cards, computer_cards, players_sum)
-        draw_buttons()
+        draw_cards(player_cards, computer_cards)
+        draw_cards_sum(players_sum, computers_sum)
+        if stand_button.draw(WIN):
+            print("STAND")
+        if hit_button.draw(WIN):
+            print("HIT")
+            new_card(player_cards, values_pcards)
+            players_sum = hand_value(values_pcards)
         result = check_round(players_sum, 0)
         pygame.display.update()
 
-
-    #kane synarthsh gia ypologismoy toy score kai oxi mesa sth main
+    # kane synarthsh gia ypologismoy toy score kai oxi mesa sth main
     if result == 'player':
         score[0] += 1
     elif result == 'computer':
@@ -181,8 +184,6 @@ def main():
 
     print("\n******Score******")
     print(f"\nPlayer's score: {score[0]} - Computer's score: {score[1]}")
-
-
 
     pygame.quit()
 
