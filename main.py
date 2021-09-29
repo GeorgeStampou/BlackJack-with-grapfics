@@ -168,6 +168,8 @@ def main():
         result = check_round(players_sum, 0)
         pygame.display.update()
 
+
+    #kane synarthsh gia ypologismoy toy score kai oxi mesa sth main
     if result == 'player':
         score[0] += 1
     elif result == 'computer':
