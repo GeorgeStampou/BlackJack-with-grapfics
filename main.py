@@ -4,7 +4,7 @@ import os
 pygame.init()
 
 WIDTH, HEIGHT = 1200, 800
-CARD_WIDTH , CARD_HEIGHT = 150, 200
+CARD_WIDTH, CARD_HEIGHT = 150, 200
 BUTTON_WIDTH, BUTTON_HEIGHT = 80, 80
 FPS = 60
 GREEN = (0,100,0)
@@ -41,8 +41,8 @@ def player():
         cards.add(card)
         print("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")
 
-        card_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")),
-                                      (CARD_WIDTH, CARD_HEIGHT))
+        card_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/"+card[0],
+                                            str(card[1]) + "_" + card[0]+".png")), (CARD_WIDTH, CARD_HEIGHT))
         player_cards.add(card_image)
 
     print(f"\nPlayer's cards: {cards}")
@@ -58,15 +58,15 @@ def computer():
 
     print("\n******Computer's turn!******")
 
-    for _ in range(2):
-        card = deck.pop()
-        print(card)
-        cards.add(card)
-        print("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")
 
-        card_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")),
-                                      (CARD_WIDTH, CARD_HEIGHT))
-        computer_cards.add(card_image)
+    card = deck.pop()
+    print(card)
+    cards.add(card)
+    print("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")
+
+    card_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/"+card[0], str(card[1]) + "_" + card[0]+".png")),
+                                    (CARD_WIDTH, CARD_HEIGHT))
+    computer_cards.add(card_image)
 
     print(f"\nComputer's cards: {cards}")
 
@@ -93,28 +93,27 @@ def hand_value(cards):
     return cards_sum
 
 
-def draw_window(player_cards,computer_cards, players_sum):
-    players_sum_text = font.render("Your total sum is: "+str(players_sum), True, BLACK)
-
-    step = 150
+def draw_window():
 
     WIN.fill(GREEN)
     WIN.blit(dealer_text, (0,100))
     WIN.blit(player_text, (0, 700))
+
+    #pygame.display.update()
+
+
+def draw_cards(player_cards, computer_cards, players_sum):
+    players_sum_text = font.render("Your total sum is: " + str(players_sum), True, BLACK)
+    step = 150
     for card in player_cards:
-        
-        WIN.blit(card, (step + CARD_WIDTH,600))
+        WIN.blit(card, (step + CARD_WIDTH, 600))
         step += 150
 
     step = 150
     for card in computer_cards:
-        
-        WIN.blit(card, (step + CARD_WIDTH,0))
+        WIN.blit(card, (step + CARD_WIDTH, 0))
         step += 150
-    
-    WIN.blit(players_sum_text, (0,750))
-
-    #pygame.display.update()
+    WIN.blit(players_sum_text, (0, 750))
 
 
 def draw_buttons():
@@ -122,10 +121,35 @@ def draw_buttons():
     WIN.blit(stand_image, (390, 500))
 
 
+def check_round(players_sum, computers_sum):
+    result = ""
+
+    if players_sum == 21:
+        draw_result("***CONGRATULATIONS***. You won the round!!!")
+        result = 'player'
+    elif players_sum < 21:
+        draw_result("gia na dw an proxwraei ok")
+
+    return result
+
+
+def draw_result(string):
+    string_text = font.render(string, True, BLACK)
+    string_rect = string_text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+    WIN.blit(string_text, string_rect)
+
+
+
+
+
 
 def main():
     clock = pygame.time.Clock()
     run = True
+
+    rounds = 1
+    score = [0, 0]
+    result = ""
 
     players_sum = 0
 
@@ -138,9 +162,24 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        draw_window(player_cards, computer_cards, players_sum)
+        draw_window()
+        draw_cards(player_cards, computer_cards, players_sum)
         draw_buttons()
+        result = check_round(players_sum, 0)
         pygame.display.update()
+
+    if result == 'player':
+        score[0] += 1
+    elif result == 'computer':
+        score[1] += 1
+    elif result == 'deuce':
+        pass
+    else:
+        print("Error")
+
+    print("\n******Score******")
+    print(f"\nPlayer's score: {score[0]} - Computer's score: {score[1]}")
+
 
 
     pygame.quit()
