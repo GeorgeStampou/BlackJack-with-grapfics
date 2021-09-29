@@ -122,10 +122,20 @@ def check_round(players_sum, computers_sum):
     if players_sum == 21:
         draw_result("***CONGRATULATIONS***. You won the round!!!")
         result = 'player'
-    elif players_sum < 21:
-        draw_result("gia na dw an proxwraei ok")
-    else:
+    elif players_sum > 21:
         draw_result("***You lost***")
+    else:
+        if computers_sum > 21:
+            draw_result("Computer is out.")
+            draw_result("***CONGRATULATIONS***. You won the round!!!")
+            result = 'player'
+        else:
+            if computers_sum > players_sum:
+                draw_result("Computer won!")
+                result = 'computer'
+            if computers_sum == players_sum:
+                draw_result("Deuce.")
+                result = 'deuce'
 
     return result
 
@@ -165,11 +175,19 @@ def main():
         draw_cards_sum(players_sum, computers_sum)
         if stand_button.draw(WIN):
             print("STAND")
+            flag = True
+            while flag:
+                if computers_sum < players_sum:
+                    new_card(computer_cards, values_ccards)
+                    computers_sum = hand_value(values_ccards)
+                else:
+                    flag = False
+
         if hit_button.draw(WIN):
             print("HIT")
             new_card(player_cards, values_pcards)
             players_sum = hand_value(values_pcards)
-        result = check_round(players_sum, 0)
+        result = check_round(players_sum, computers_sum)
         pygame.display.update()
 
     # kane synarthsh gia ypologismoy toy score kai oxi mesa sth main
