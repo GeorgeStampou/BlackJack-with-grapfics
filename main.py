@@ -7,6 +7,8 @@ pygame.init()
 WIDTH, HEIGHT = 1200, 800
 CARD_WIDTH, CARD_HEIGHT = 150, 200
 BUTTON_WIDTH, BUTTON_HEIGHT = 80, 80
+RESTART_WIDTH, RESTART_HEIGHT = 150, 50
+
 FPS = 60
 GREEN = (0, 100, 0)
 BLACK = (0, 0, 0)
@@ -23,6 +25,10 @@ hit_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/option
                                    (BUTTON_WIDTH, BUTTON_HEIGHT))
 stand_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/options", "stand.png")),
                                      (BUTTON_WIDTH, BUTTON_HEIGHT))
+restart_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/options", "restart.png")),
+                                       (RESTART_WIDTH, RESTART_HEIGHT))
+play_again_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/options", "playagain.png")),
+                                          (RESTART_WIDTH, RESTART_HEIGHT))
 
 
 kind = {"heart", "diamond", "spade", "club"}
@@ -116,59 +122,51 @@ def draw_cards_sum(players_sum, computers_sum):
     WIN.blit(computers_sum_text, (0, 150))
 
 
-def check_round(players_sum, computers_sum):
-
-    scores = [0, 0]
+def check_round(players_sum, computers_sum, scores):
 
     if players_sum == 21:
-        draw_result("***CONGRATULATIONS***. You won the round!!!")
         scores[0] += 1
+        draw_result("***CONGRATULATIONS***. You won the round!!!", scores)
     elif players_sum > 21:
-        draw_result("***You lost***")
         scores[1] += 1
-        draw_score(scores)
+        draw_result("***You lost***", scores)
+
     else:
         if computers_sum > 21:
-            draw_result("Computer is out.")
-            draw_result("***CONGRATULATIONS***. You won the round!!!")
+            # draw_result("Computer is out.")
             scores[0] += 1
-            draw_score(scores)
+            draw_result("***CONGRATULATIONS***. You won the round!!!", scores)
+
         else:
             if computers_sum > players_sum:
-                draw_result("Computer won!")
                 scores[1] += 1
-                draw_score(scores)
+                draw_result("Computer won!", scores)
+
             if computers_sum == players_sum:
-                draw_result("Deuce.")
-                draw_score(scores)
+                draw_result("Deuce.", scores)
 
     return scores
 
 
 # kane mazi sthn draw result to string kai to score
-def draw_result(string):
+def draw_result(string, scores):
     string_text = font.render(string, True, BLACK)
+    scores_text = font.render("***SCORE*** You: " + str(scores[0]) + " Dealer: " + str(scores[1]), True, BLACK)
     string_rect = string_text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+    scores_rect = scores_text.get_rect(center=(WIDTH / 2, (HEIGHT / 2)+50))
     WIN.blit(string_text, string_rect)
+    #scores den vgainei swsta opote comment
+    # WIN.blit(scores_text, scores_rect)
 
 
-def draw_score(scores):
-
-    string = "***SCORE*** You: "+str(scores[0])+ " Dealer: "+str(scores[1])
-    string_text = font.render(string, True, BLACK)
-    string_rect = string_text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
-    WIN.blit(string_text, string_rect)
-
-
-def main():
+def main(scores, rounds):
     clock = pygame.time.Clock()
     run = True
 
     hit_button = button.Button(300, 500, hit_image, 1)
     stand_button = button.Button(390, 500, stand_image, 1)
-
-    rounds = 1
-    scores = [0, 0]
+    restart_button = button.Button(1000, 400, restart_image, 1)
+    play_again_button = button.Button(1000, 520, play_again_image, 1)
 
     player_cards, values_pcards = player()
     players_sum = hand_value(values_pcards)
@@ -176,6 +174,7 @@ def main():
     computers_sum = hand_value(values_ccards)
 
     while run:
+
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -184,6 +183,7 @@ def main():
         draw_window()
         draw_cards(player_cards, computer_cards)
         draw_cards_sum(players_sum, computers_sum)
+
         if stand_button.draw(WIN):
             print("STAND")
             flag = True
@@ -193,25 +193,54 @@ def main():
                     computers_sum = hand_value(values_ccards)
                 else:
                     flag = False
-
         if hit_button.draw(WIN):
             print("HIT")
             new_card(player_cards, values_pcards)
             players_sum = hand_value(values_pcards)
-        scores = check_round(players_sum, computers_sum)
+
+        if computers_sum != 0:
+            scores = check_round(players_sum, computers_sum, scores)
+
+            # if scores != [0, 0]:
+
+            if play_again_button.draw(WIN):
+                print("play again")
+                # scores += scores
+                # rounds += 1
+                for card in values_pcards:
+                    deck.add(card)
+
+                for card in values_ccards:
+                    deck.add(card)
+                print(len(deck))
+                main(scores, rounds)
+                '''
+                if restart_button.draw(WIN):
+                    print("restart")
+                    main(scores, rounds)
+                '''
+
+        else:
+            print("ERROR! Computer has no score.")
 
         pygame.display.update()
 
-    # kane synarthsh gia ypologismoy toy score kai oxi mesa sth main
-
-
+    print(len(deck))
     print("\n******Score******")
     print(f"\nPlayer's score: {scores[0]} - Computer's score: {scores[1]}")
+
+    for card in player_cards:
+        deck.add(card)
+
+    for card in computer_cards:
+        deck.add(card)
 
     pygame.quit()
 
 
 if __name__ == '__main__':
-    main()
+    scores = [0, 0]
+    rounds = 0
+    main(scores, rounds)
 
 
