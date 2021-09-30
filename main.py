@@ -8,8 +8,8 @@ WIDTH, HEIGHT = 1200, 800
 CARD_WIDTH, CARD_HEIGHT = 150, 200
 BUTTON_WIDTH, BUTTON_HEIGHT = 80, 80
 FPS = 60
-GREEN = (0,100,0)
-BLACK = (0,0,0)
+GREEN = (0, 100, 0)
+BLACK = (0, 0, 0)
 
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("BlackJack")
@@ -26,9 +26,9 @@ stand_image = pygame.transform.scale(pygame.image.load(os.path.join("Assets/opti
 
 
 kind = {"heart", "diamond", "spade", "club"}
-number = {"ace", 2, 3, 4, 5, 6, 7, 8, 9, 10,"jack", "queen", "king"}
+number = {"ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"}
 
-deck = {(k,n) for k in kind for n in number}
+deck = {(k, n) for k in kind for n in number}
 
 
 def new_card(pcards, value_of_cards):
@@ -90,7 +90,7 @@ def hand_value(cards):
 def draw_window():
 
     WIN.fill(GREEN)
-    WIN.blit(dealer_text, (0,100))
+    WIN.blit(dealer_text, (0, 100))
     WIN.blit(player_text, (0, 700))
 
     # pygame.display.update()
@@ -117,30 +117,44 @@ def draw_cards_sum(players_sum, computers_sum):
 
 
 def check_round(players_sum, computers_sum):
-    result = ""
+
+    scores = [0, 0]
 
     if players_sum == 21:
         draw_result("***CONGRATULATIONS***. You won the round!!!")
-        result = 'player'
+        scores[0] += 1
     elif players_sum > 21:
         draw_result("***You lost***")
+        scores[1] += 1
+        draw_score(scores)
     else:
         if computers_sum > 21:
             draw_result("Computer is out.")
             draw_result("***CONGRATULATIONS***. You won the round!!!")
-            result = 'player'
+            scores[0] += 1
+            draw_score(scores)
         else:
             if computers_sum > players_sum:
                 draw_result("Computer won!")
-                result = 'computer'
+                scores[1] += 1
+                draw_score(scores)
             if computers_sum == players_sum:
                 draw_result("Deuce.")
-                result = 'deuce'
+                draw_score(scores)
 
-    return result
+    return scores
 
 
+# kane mazi sthn draw result to string kai to score
 def draw_result(string):
+    string_text = font.render(string, True, BLACK)
+    string_rect = string_text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+    WIN.blit(string_text, string_rect)
+
+
+def draw_score(scores):
+
+    string = "***SCORE*** You: "+str(scores[0])+ " Dealer: "+str(scores[1])
     string_text = font.render(string, True, BLACK)
     string_rect = string_text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
     WIN.blit(string_text, string_rect)
@@ -154,10 +168,7 @@ def main():
     stand_button = button.Button(390, 500, stand_image, 1)
 
     rounds = 1
-    score = [0, 0]
-    result = ""
-
-    players_sum, computers_sum = 0, 0
+    scores = [0, 0]
 
     player_cards, values_pcards = player()
     players_sum = hand_value(values_pcards)
@@ -187,29 +198,20 @@ def main():
             print("HIT")
             new_card(player_cards, values_pcards)
             players_sum = hand_value(values_pcards)
-        result = check_round(players_sum, computers_sum)
+        scores = check_round(players_sum, computers_sum)
+
         pygame.display.update()
 
     # kane synarthsh gia ypologismoy toy score kai oxi mesa sth main
-    if result == 'player':
-        score[0] += 1
-    elif result == 'computer':
-        score[1] += 1
-    elif result == 'deuce':
-        pass
-    else:
-        print("Error")
+
 
     print("\n******Score******")
-    print(f"\nPlayer's score: {score[0]} - Computer's score: {score[1]}")
+    print(f"\nPlayer's score: {scores[0]} - Computer's score: {scores[1]}")
 
     pygame.quit()
 
 
 if __name__ == '__main__':
     main()
-
-
-
 
 
